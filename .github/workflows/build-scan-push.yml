@@ -73,6 +73,10 @@ jobs:
           curl -Lo wizcli https://wizcli.app.wiz.io/latest/wizcli-linux-amd64
           chmod +x wizcli
           ./wizcli auth --id "${{ secrets.WIZ_CLIENT_ID }}" --secret "${{ secrets.WIZ_CLIENT_SECRET }}"
-          ./wizcli docker scan --image ${{ matrix.image }} --dockerfile "${{ matrix.dockerfile }}/Dockerfile"
+          ./wizcli docker scan --image ${{ matrix.image }} --dockerfile "${{ matrix.dockerfile }}/Dockerfile" \
+            -p "Default vulnerabilities policy - Do Not Modify" \
+            -p "Default sensitive data policy" \
+            -p "Default secrets policy" \
+            -p "Default malware policy"
           ./wizcli docker tag --image ${{ matrix.image }}
         continue-on-error: true
