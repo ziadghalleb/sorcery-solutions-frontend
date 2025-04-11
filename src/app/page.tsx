@@ -3,6 +3,7 @@
 import { useState, useEffect, FormEvent } from 'react';
 import Link from 'next/link';
 import axios from 'axios';
+import yaml from 'js-yaml';
 
 interface FormState {
   name: string;
@@ -21,6 +22,7 @@ export default function Home() {
   const [form, setForm] = useState<FormState>({ name: '', spell: '' });
   const [submitted, setSubmitted] = useState<boolean>(false);
   const [stars, setStars] = useState<Star[]>([]);
+  const [yamlFile, setYamlFile] = useState<File | null>(null);
 
   useEffect(() => {
     const starArray: Star[] = Array.from({ length: 30 }, (_, n) => ({
@@ -43,6 +45,42 @@ export default function Home() {
       alert("Oops! The magic scroll failed. Try again later.");
       console.error(err);
     }
+  };
+
+  const handleYamlUpload = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!yamlFile) {
+      alert("Please select a YAML file.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = async () => {
+      const yamlContent = reader.result;
+      try {
+        // Validate YAML structure
+        const parsedYaml = yaml.load(yamlContent as string);
+        if (
+          !parsedYaml ||
+          typeof parsedYaml !== 'object' ||
+          !Array.isArray((parsedYaml as any).spells) ||
+          !(parsedYaml as any).spells.every(
+            (spell: any) => typeof spell.name === 'string' && typeof spell.spell === 'string'
+          )
+        ) {
+          alert("Invalid YAML structure. Ensure it contains a 'spells' array with 'name' and 'spell' fields.");
+          return;
+        }
+
+        // Send to backend
+        await axios.post('/api/import_spellbook', { yaml: yamlContent });
+        alert("YAML file uploaded successfully!");
+      } catch (err) {
+        alert("Failed to upload YAML file. Ensure the file is valid.");
+        console.error(err);
+      }
+    };
+    reader.readAsText(yamlFile);
   };
 
   return (
@@ -79,6 +117,7 @@ export default function Home() {
 
         <div className="bg-black bg-opacity-30 rounded-2xl p-6 shadow-2xl w-full max-w-md">
           <h2 className="text-2xl font-bold mb-2">Summon a Spell (Contact Us)</h2>
+          {/* Manual Input Form */}
           <form onSubmit={submitForm} className="flex flex-col space-y-4">
             <input
               value={form.name}
@@ -103,6 +142,20 @@ export default function Home() {
               ✨ Spell cast successfully! We'll be in touch by owl. 🦉
             </div>
           )}
+
+          {/* YAML Upload Form */}
+          <form onSubmit={handleYamlUpload} className="flex flex-col space-y-4 mt-6">
+            <h3 className="text-xl font-bold">Upload a Spellbook (YAML)</h3>
+            <input
+              type="file"
+              accept=".yaml,.yml"
+              onChange={(e) => setYamlFile(e.target.files?.[0] || null)}
+              className="p-2 rounded-lg bg-gray-200 text-black"
+            />
+            <button type="submit" className="bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-xl shadow-md">
+              📜 Upload Spellbook
+            </button>
+          </form>
         </div>
       </main>
     </div>
