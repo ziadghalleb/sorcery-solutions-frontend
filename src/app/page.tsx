@@ -83,6 +83,7 @@ export default function Home() {
     reader.readAsText(yamlFile);
   };
 
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-pink-600 to-blue-800 text-white p-6 relative overflow-hidden">
       <nav className="z-20 flex justify-between items-center max-w-5xl mx-auto py-4 px-6 bg-black bg-opacity-30 rounded-xl mb-8 shadow-xl">
