@@ -73,7 +73,7 @@ export default function Home() {
         }
 
         // Send to backend
-        await axios.post('/api/import_spellbook', { yaml: yamlContent });
+        await axios.post('/api/import_spellbook', { yaml_content: yamlContent });
         alert("YAML file uploaded successfully!");
       } catch (err) {
         alert("Failed to upload YAML file. Ensure the file is valid.");
