@@ -60,8 +60,15 @@ export default function Home() {
       try {
         // Validate YAML structure
         const parsedYaml = yaml.load(yamlContent as string);
-        if (!parsedYaml || typeof parsedYaml !== 'object' || !Array.isArray((parsedYaml as any).spells)) {
-          alert("Invalid YAML structure. Please ensure it contains a 'spells' array.");
+        if (
+          !parsedYaml ||
+          typeof parsedYaml !== 'object' ||
+          !Array.isArray((parsedYaml as any).spells) ||
+          !(parsedYaml as any).spells.every(
+            (spell: any) => typeof spell.name === 'string' && typeof spell.spell === 'string'
+          )
+        ) {
+          alert("Invalid YAML structure. Ensure it contains a 'spells' array with 'name' and 'spell' fields.");
           return;
         }
 
